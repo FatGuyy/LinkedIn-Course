@@ -1,8 +1,30 @@
-use std::collections::{HashMap, LinkedList, VecDeque};
+// FILE I/O
+use std::fs::File;
+use std::io::{self, Read};
 
-fn main() {
+fn file() -> io::Result<()> {
+    // Open a file in read-only mode
+    let mut file = File::open("example.txt")?;
     
-    // VECTORS
+    // Create a buffer to store the data read from the file
+    let mut buffer = Vec::new();
+    
+    // Read data from the file into the buffer
+    file.read_to_end(&mut buffer)?;
+    
+    // Convert the buffer to a string (assuming the file contains text)
+    let file_contents = String::from_utf8_lossy(&buffer);
+    
+    // Print the file contents
+    println!("File Contents:\n{}", file_contents);
+    
+    Ok(())
+}
+
+
+use std::collections::{HashMap, LinkedList, VecDeque};
+fn data_struct() {
+// VECTORS
     // Creating an empty vector of integers
     let mut numbers: Vec<i32> = Vec::new();
 
@@ -80,5 +102,13 @@ fn main() {
     if let Some(front) = queue.pop_front() {
         println!("Dequeued: {}", front);
     }
+
+}
+
+
+fn main() {
+
+    // data_struct()
+    file();
 
 }
