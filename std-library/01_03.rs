@@ -1,3 +1,4 @@
+// import required 
 use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::thread;
@@ -56,13 +57,23 @@ fn get_response(request: &str) -> Result<String, &'static str> {
 // Function to read the content of a file and format an HTTP response
 fn read_file(filename: &str) -> String {
     match fs::read_to_string(filename) {
+                                // This is a raw html response in raw text format, with html file passed in as string
+                                // HTTP/1.1 200 OK - status line
+                                // "\r\n" - required new line to separate header from body
+                                // Content-Type: text/html - HTTP header telling the type of content
         Ok(content) => format!("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n{}", content),
+                    // If there is an error, we return the error html response
+                    // "HTTP/1.1 500 Internal Server Error" - This is the status line
+                    // "\r\n\r\n" - sequence of characters representing a carriage return
+                    // "500 Internal Server Error" - response message
         Err(_) => "HTTP/1.1 500 Internal Server Error\r\n\r\n500 Internal Server Error".to_string(),
     }
 }
 
 // Main function where the server binds to an address and listens for incoming connections
 fn main() {
+    // make a new tcp_listener which is binded to a ip address and its port number
+    // expect make sures that if the port or ip is not available, we handle the error
     let listener = TcpListener::bind("127.0.0.1:8080").expect("Failed to bind");
 
     println!("Server listening on 127.0.0.1:8080...");
@@ -76,7 +87,8 @@ fn main() {
                     handle_client(stream);
                 });
             }
-            Err(e) => eprintln!("Error: {}", e),
+                // If there is any error in accepting the connection, the error is printed
+            Err(e) => eprintln!("Error accepting connection: {}", e),
         }
     }
 }
