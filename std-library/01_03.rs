@@ -4,6 +4,40 @@ use std::net::{TcpListener, TcpStream};
 use std::thread;
 use std::fs;
 
+// Function to read the content of a file and format an HTTP response
+fn read_file(filename: &str) -> String {
+    match fs::read_to_string(filename) {
+                                // This is a raw html response in raw text format, with html file passed in as string
+                                // HTTP/1.1 200 OK - status line
+                                // "\r\n" - required new line to separate header from body
+                                // Content-Type: text/html - HTTP header telling the type of content
+        Ok(content) => format!("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n{}", content),
+                    // If there is an error, we return the error html response
+                    // "HTTP/1.1 500 Internal Server Error" - This is the status line
+                    // "\r\n\r\n" - sequence of characters representing a carriage return
+                    // "500 Internal Server Error" - response message
+        Err(_) => "HTTP/1.1 500 Internal Server Error\r\n\r\n500 Internal Server Error".to_string(),
+        }
+}
+
+// Function to determine the response based on the request
+fn get_response(request: &str) -> Result<String, &'static str> {
+    // Check if the request contains "/"
+    if request.contains("GET /") {
+        // If yes, read the content of "index.html" and format an HTTP response
+        Ok(read_file("index.html"))
+    } 
+    // Check if the request contains "/second"
+    else if request.contains("GET /second") {
+        // If yes, read the content of "second.html" and format an HTTP response
+        Ok(read_file("second.html"))
+    }
+    // If no matching route is found, return an error
+    else {
+        Err("Route not found")
+    }
+}
+
 // Function to handle each client connection
 fn handle_client(mut stream: TcpStream) {
     // Buffer to store incoming data
@@ -33,40 +67,6 @@ fn handle_client(mut stream: TcpStream) {
     // Flush the output stream
     if let Err(e) = stream.flush() {
         eprintln!("Failed to flush connection: {}", e);
-    }
-}
-
-// Function to determine the response based on the request
-fn get_response(request: &str) -> Result<String, &'static str> {
-    // Check if the request contains "/"
-    if request.contains("GET /") {
-        // If yes, read the content of "index.html" and format an HTTP response
-        Ok(read_file("index.html"))
-    } 
-    // Check if the request contains "/second"
-    else if request.contains("GET /second") {
-        // If yes, read the content of "second.html" and format an HTTP response
-        Ok(read_file("second.html"))
-    }
-    // If no matching route is found, return an error
-    else {
-        Err("Route not found")
-    }
-}
-
-// Function to read the content of a file and format an HTTP response
-fn read_file(filename: &str) -> String {
-    match fs::read_to_string(filename) {
-                                // This is a raw html response in raw text format, with html file passed in as string
-                                // HTTP/1.1 200 OK - status line
-                                // "\r\n" - required new line to separate header from body
-                                // Content-Type: text/html - HTTP header telling the type of content
-        Ok(content) => format!("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n{}", content),
-                    // If there is an error, we return the error html response
-                    // "HTTP/1.1 500 Internal Server Error" - This is the status line
-                    // "\r\n\r\n" - sequence of characters representing a carriage return
-                    // "500 Internal Server Error" - response message
-        Err(_) => "HTTP/1.1 500 Internal Server Error\r\n\r\n500 Internal Server Error".to_string(),
     }
 }
 
